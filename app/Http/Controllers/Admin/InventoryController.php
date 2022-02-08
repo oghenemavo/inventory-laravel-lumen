@@ -40,12 +40,19 @@ class InventoryController extends Controller
     
     public function read($id)
     {
-        $inventory = Inventory::findOrFail($id);
+        $inventory = Inventory::find($id);
+
+        if ($inventory) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $inventory,
+                'mesage' => 'inventory fetched successfully',
+            ], 200);
+        }
         return response()->json([
-            'status' => 'success',
-            'data' => $inventory,
-            'mesage' => 'inventory fetched successfully',
-        ], 200);
+            'status' => 'fail',
+            'mesage' => 'Inventory not found',
+        ], 404);
 
     }
     
@@ -61,32 +68,45 @@ class InventoryController extends Controller
 
     public function update(Request $request, $id)
     {
-        $inventory = Inventory::findOrFail($id);
+        $inventory = Inventory::find($id);
 
+        if ($inventory) {
+            $rules = [
+                'name' => 'required|min:2',
+                'price' => 'required|min:2',
+                'quantity' => 'required|min:2',
+            ];
+    
+            $this->validate($request, $rules);
+    
+            $inventory->name = $request->input('name');
+            $inventory->price = $request->input('price');
+            $inventory->quantity = $request->input('quantity');
+    
+            $stock = $inventory->save();
+    
+            return response()->json([
+                'status' => 'success',
+                'data' => $stock,
+                'mesage' => 'Inventory updated successfully',
+            ], 200);
+        }
+        return response()->json([
+            'status' => 'fail',
+            'mesage' => 'Inventory not found',
+        ], 404);
+
+    }
+    
+    public function delete(Request $request)
+    {    
         $rules = [
-            'name' => 'required|min:2',
-            'price' => 'required|min:2',
-            'quantity' => 'required|min:2',
+            'id' => 'required|min:1|numeric'
         ];
 
         $this->validate($request, $rules);
 
-        $inventory->name = $request->input('name');
-        $inventory->price = $request->input('price');
-        $inventory->quantity = $request->input('quantity');
-
-        $stock = $inventory->save();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $stock,
-            'mesage' => 'Inventory updated successfully',
-        ], 200);
-    }
-    
-    public function delete($id)
-    {    
-        $stock = Inventory::findOrFail($id)->delete();
+        $stock = Inventory::find($request->id)->delete();
     
         return response()->json([
             'status' => 'success',
