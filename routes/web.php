@@ -13,6 +13,14 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
+// $router->get('/', function () use ($router) {
+//     return $router->app->version();
+// });
+
+$router->group(['prefix' => 'api'], function() use ($router) {
+    $router->post('inventory/create', 'Admin\InventoryController@create');
+    $router->get('inventory', 'Admin\InventoryController@all');
+    $router->get('inventory/{id}', 'Admin\InventoryController@read');
+    $router->post('inventory/edit/{id}', 'Admin\InventoryController@update');
+    $router->post('inventory/delete/{id}', 'Admin\InventoryController@delete');
 });
